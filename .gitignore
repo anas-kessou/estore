@@ -1,0 +1,16 @@
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Backend (Maven)
+estore-backend/target/
+
+# Frontend (Node)
+estore-frontend/node_modules/
+estore-frontend/dist/
+estore-frontend/.pnpm-store/
+
+# Environment files
+estore-backend/.env
+estore-frontend/.env

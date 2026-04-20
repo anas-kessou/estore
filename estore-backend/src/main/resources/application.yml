@@ -1,0 +1,46 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: estore-backend
+
+  # MySQL Configuration
+  datasource:
+    url: ${DB_URL:jdbc:h2:mem:estore_db;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE}
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
+    driver-class-name: ${DB_DRIVER:org.h2.Driver}
+
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: ${HIBERNATE_DIALECT:org.hibernate.dialect.H2Dialect}
+        format_sql: true
+
+  # MongoDB Configuration
+  data:
+    mongodb:
+      uri: ${MONGO_URI:mongodb://localhost:27017/estore_reviews}
+      auto-index-creation: true
+
+  # Jackson Configuration
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET:YourSuperSecretKeyForJWTTokenGenerationThatIsAtLeast256BitsLong123456789}
+  expiration: ${JWT_EXPIRATION:86400000} # 24 hours in milliseconds
+
+# Logging
+logging:
+  level:
+    com.estore: DEBUG
+    org.springframework.security: DEBUG
