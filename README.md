@@ -16,8 +16,11 @@ Monorepo containing:
 
 ## 1) Run backend
 
+Make sure to map the correct `JAVA_HOME` if your default Java version is < 21 (this project uses Java 21):
+
 ```bash
 cd estore-backend
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
 mvn clean spring-boot:run
 ```
 
@@ -25,10 +28,12 @@ Backend API: `http://localhost:8080/api`
 
 ## 2) Run frontend
 
+If `pnpm` isn't installed globally, use `npx`:
+
 ```bash
 cd estore-frontend
-pnpm install
-pnpm dev
+npx --yes pnpm install
+npx --yes pnpm run dev
 ```
 
 Frontend URL: `http://localhost:5173`

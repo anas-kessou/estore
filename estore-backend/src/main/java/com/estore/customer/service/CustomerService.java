@@ -9,6 +9,7 @@ import com.estore.exception.DuplicateResourceException;
 import com.estore.exception.ResourceNotFoundException;
 import com.estore.exception.UnauthorizedException;
 import com.estore.security.JwtTokenProvider;
+import com.estore.security.UserPrincipal;
 import com.estore.shopping.entity.Cart;
 import com.estore.shopping.repository.CartRepository;
 import lombok.RequiredArgsConstructor;

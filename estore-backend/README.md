@@ -41,7 +41,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/estore_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: root
-    password: your_password
+    password: ImStrongPa$$Word
 
   data:
     mongodb:
