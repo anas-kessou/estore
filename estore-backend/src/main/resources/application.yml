@@ -25,7 +25,7 @@ spring:
   # MongoDB Configuration
   data:
     mongodb:
-      uri: ${MONGO_URI:mongodb://localhost:27017/estore_reviews}
+      uri: ${MONGO_URI:mongodb+srv://anas-kessou:PassWordIsAnas@cluster0.jjdqptm.mongodb.net/estore_reviews?appName=Cluster0}
       auto-index-creation: true
 
   # Jackson Configuration

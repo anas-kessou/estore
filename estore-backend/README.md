@@ -1,6 +1,7 @@
 # E-Store Backend
 
-A Spring Boot backend for an e-commerce application.
+## Description
+This is the robust Spring Boot backend API for the E-Store platform. It serves as the central data and authentication hub, providing RESTful endpoints for user management, product catalog browsing, cart operations, and order processing. The backend uniquely utilizes a dual-database design: MySQL for structured transactional data (users, products, orders) and MongoDB for flexible document storage (product reviews).
 
 ## Technology Stack
 

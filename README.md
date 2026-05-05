@@ -1,52 +1,125 @@
-# E-Store Full Stack
+# 🛍️ E-Store Full Stack E-Commerce Platform
 
-Monorepo containing:
+## 📖 Description
+E-Store is a comprehensive, dual-database e-commerce solution designed to provide a seamless shopping experience. It allows users to browse products, manage their shopping carts, place orders, and leave reviews. The backend is powered by Spring Boot (Java 21) handling robust business logic and secure JWT authentication, while the frontend is a blazing-fast React + Vite application featuring a modern, highly responsive UI.
 
-- `estore-backend` (Spring Boot, MySQL, MongoDB, JWT)
-- `estore-frontend` (React + Vite + Axios)
+This monorepo contains both the **Spring Boot Backend** and the **React + Vite Frontend**.
 
-## Prerequisites
+![UI Preview](https://via.placeholder.com/1000x400?text=E-Store+Modern+UI)
 
-- Java 17+
-- Maven 3.6+
-- MySQL 8+
-- MongoDB 6+
-- Node.js 20+
-- pnpm 8+
+## ✨ Key Features
 
-## 1) Run backend
+- **Modern Responsive UI**: Premium aesthetic with Glassmorphism, Tailwind CSS, Plus Jakarta Sans, and fluid animations.
+- **Secure Authentication**: Stateless JWT-based authentication with role-based access control.
+- **Catalog & Inventory**: Browse categories, search products, check real-time stock limits.
+- **Shopping Cart**: User-specific saved carts, session-persisted selections.
+- **Dual Database Architecture**: Relational tracking with **MySQL** (Users, Orders, Cart) and NoSQL flexibility with **MongoDB** (Product Reviews).
 
-Make sure to map the correct `JAVA_HOME` if your default Java version is < 21 (this project uses Java 21):
+---
+
+## 🛠️ Technology Stack
+
+### 🎨 Frontend (`/estore-frontend`)
+- **Framework**: React 18 & Vite
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Routing**: React Router DOM (v6)
+- **Icons**: Lucide React
+- **API Client**: Axios
+
+### ⚙️ Backend (`/estore-backend`)
+- **Framework**: Spring Boot 3.2.x
+- **Language**: Java 21
+- **Databases**: 
+  - MySQL 8.x (Spring Data JPA)
+  - MongoDB 6.x (Spring Data MongoDB)
+- **Security**: Spring Security + JWT Token Provider
+- **Build Tool**: Maven
+
+---
+
+## 📋 Prerequisites
+
+Before running the project locally, ensure you have the following installed:
+- **Java 21** 
+- **Maven 3.6+**
+- **Node.js 20+** & **npm**
+- **MySQL 8.0+**
+- **MongoDB 6.0+**
+
+---
+
+## 🚦 Getting Started
+
+### 1. Database Setup
+
+You must have both MySQL and MongoDB running locally.
+
+**MySQL Setup:**
+```sql
+CREATE DATABASE estore_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+*(Configure `application.yml` inside `estore-backend/src/main/resources/` with your local MySQL credentials).*
+
+**MongoDB Setup:**
+```bash
+mongosh --eval "use estore_reviews"
+```
+
+### 2. Backend Setup & Run
+
+The backend API uses Java 21. If your default `JAVA_HOME` is an older version (e.g., Java 17), you must export the Java 21 path before running:
 
 ```bash
 cd estore-backend
+
+# Set Java 21 exactly (path for Linux/Kali provided as an example)
 export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+
+# Clean and start the Spring Boot server
 mvn clean spring-boot:run
 ```
+> The API will be accessible over `http://localhost:8080/api`.
 
-Backend API: `http://localhost:8080/api`
+### 3. Frontend Setup & Run
 
-## 2) Run frontend
-
-If `pnpm` isn't installed globally, use `npx`:
+The frontend has been natively configured to process with `npm`.
 
 ```bash
 cd estore-frontend
-npx --yes pnpm install
-npx --yes pnpm run dev
+
+# Install node dependencies
+npm install
+
+# Start the Vite development server
+npm run dev
 ```
 
-Frontend URL: `http://localhost:5173`
+> The application UI will be accessible over `http://localhost:5173` (or `5174` if `5173` is busy).  
+> Make sure the backend is running to avoid API fetch errors!
 
-## Frontend ↔ Backend link
+---
 
-- Frontend uses axios in `estore-frontend/src/core/services/api.ts`
-- Base URL comes from `VITE_API_BASE_URL` in `estore-frontend/.env`
-- Backend CORS allows `http://localhost:5173`
-- Backend response envelope `ApiResponse<T>` is unwrapped in frontend service helpers
+## 🔌 API Architecture (Frontend ↔ Backend)
 
-## Quick login
+- Frontend manages API requests uniformly via `estore-frontend/src/core/services/api.ts` utilizing Axios interceptors to auto-inject the JWT Authorization header.
+- The `VITE_API_BASE_URL` is configured to target `http://localhost:8080/api` natively via `@/core/services` defaults.
+- Backend resolves CORS allowances pointing clearly to local development URLs.
 
-- `john@example.com` / `password123`
-- `jane@example.com` / `password123`
-- `admin@example.com` / `admin123`
+---
+
+## 🔑 Quick Test Credentials
+
+Below are the default provisioned user accounts loaded into the database:
+
+| Role | Email | Password |
+|------|-------|----------|
+| **Customer** | `john@example.com` | `password123` |
+| **Customer** | `jane@example.com` | `password123` |
+| **Admin** | `admin@example.com` | `admin123` |
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License.

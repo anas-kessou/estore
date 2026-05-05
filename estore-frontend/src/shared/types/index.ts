@@ -39,6 +39,7 @@ export interface Product {
   description: string;
   category?: Category;
   inventory?: Inventory;
+  featured?: boolean;
 }
 
 export interface Inventory {
