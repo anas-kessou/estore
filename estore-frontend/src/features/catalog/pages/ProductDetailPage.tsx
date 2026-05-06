@@ -1,77 +1,79 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CatalogService, CartService, ReviewService, AuthService } from '@/core/services';
 import { Product, Review } from '@/shared/types';
 import { ShoppingCart, Star, ArrowLeft } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useCartStore } from '@/features/cart/store/useCartStore';
 
 export const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [reviews, setReviews] = useState<Review[]>([]);
   const [quantity, setQuantity] = useState(1);
-  const [loading, setLoading] = useState(true);
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
-  const [reviewLoading, setReviewLoading] = useState(false);
+  
+  const queryClient = useQueryClient();
+  const addToCartAction = useCartStore(state => state.addToCart);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!id) return;
-      try {
-        const [productData, reviewsData] = await Promise.all([
-          CatalogService.getProductById(parseInt(id)),
-          ReviewService.getProductReviews(parseInt(id)),
-        ]);
-        setProduct(productData);
-        setReviews(reviewsData);
-      } catch (error) {
-        console.error('Failed to fetch product:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [id]);
+  // Fetch product from MySQL using TanStack Query
+  const { data: product, isLoading: productLoading, error: productError } = useQuery({
+    queryKey: ['product', id],
+    queryFn: () => CatalogService.getProductById(parseInt(id!)),
+    enabled: !!id
+  });
 
-  const handleAddToCart = async () => {
+  // Fetch reviews from MongoDB using TanStack Query
+  const { data: reviews = [], isLoading: reviewsLoading } = useQuery({
+    queryKey: ['reviews', id],
+    queryFn: () => ReviewService.getProductReviews(parseInt(id!)),
+    enabled: !!id
+  });
+
+  const cartMutation = useMutation({
+    mutationFn: async ({ user, p, q }: { user: any, p: Product, q: number }) => {
+      await addToCartAction(user.id, p, q);
+    },
+    onSuccess: () => alert('Added to cart!'),
+    onError: () => alert('Failed to add to cart')
+  });
+
+  const reviewMutation = useMutation({
+    mutationFn: async (reviewData: any) => {
+      await ReviewService.createReview(reviewData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reviews', id] });
+      setNewReview({ rating: 5, comment: '' });
+    }
+  });
+
+  const reviewLoading = reviewMutation.isPending;
+
+  const handleAddToCart = () => {
     const user = AuthService.getCurrentUser();
     if (!product || !user?.id) {
       alert('Please login to add items to cart');
       return;
     }
-    try {
-      await CartService.addToCart(user.id, product, quantity);
-      alert('Added to cart!');
-    } catch (error) {
-      alert('Failed to add to cart');
-    }
+    cartMutation.mutate({ user, p: product, q: quantity });
   };
 
-  const handleSubmitReview = async (e: React.FormEvent) => {
+  const handleSubmitReview = (e: React.FormEvent) => {
     e.preventDefault();
     const user = AuthService.getCurrentUser();
-    if (!user?.id || !product) {
+    if (!user || !product) {
       alert('Please login to submit a review');
       return;
     }
 
-    setReviewLoading(true);
-    try {
-      const review = await ReviewService.createReview({
-        productId: product.id,
-        rating: newReview.rating,
-        comment: newReview.comment,
-      });
-      setReviews([review, ...reviews]);
-      setNewReview({ rating: 5, comment: '' });
-    } catch (error) {
-      alert('Failed to submit review');
-    } finally {
-      setReviewLoading(false);
-    }
+    reviewMutation.mutate({
+      productId: product.id,
+      rating: newReview.rating,
+      comment: newReview.comment,
+    });
   };
 
-  if (loading) {
+  if (productLoading) {
     return (
       <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center">
         <div className="inline-block w-8 h-8 border-4 border-[#3498db] border-t-transparent rounded-full animate-spin"></div>
@@ -92,7 +94,7 @@ export const ProductDetailPage = () => {
     );
   }
 
-  const inStock = product.inventory?.quantity ?? 0 > 0;
+  const inStock = (product.inventory?.quantity ?? 0) > 0;
   const averageRating = reviews.length > 0
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
     : '0';
