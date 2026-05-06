@@ -10,10 +10,11 @@ This monorepo contains both the **Spring Boot Backend** and the **React + Vite F
 ## ✨ Key Features
 
 - **Modern Responsive UI**: Premium aesthetic with Glassmorphism, Tailwind CSS, Plus Jakarta Sans, and fluid animations.
+- **State Management**: Robust client-side state using **Zustand** and server-state synchronization with **TanStack Query**.
 - **Secure Authentication**: Stateless JWT-based authentication with role-based access control.
 - **Catalog & Inventory**: Browse categories, search products, check real-time stock limits.
-- **Shopping Cart**: User-specific saved carts, session-persisted selections.
-- **Dual Database Architecture**: Relational tracking with **MySQL** (Users, Orders, Cart) and NoSQL flexibility with **MongoDB** (Product Reviews).
+- **Transactional Consistency**: ACDI-compliant checkout process managed by the `BillingService`.
+- **Dual Database Architecture**: Relational tracking with **MySQL/H2** (Users, Orders, Inventory) and NoSQL flexibility with **MongoDB** (Product Reviews).
 
 ---
 
@@ -22,17 +23,19 @@ This monorepo contains both the **Spring Boot Backend** and the **React + Vite F
 ### 🎨 Frontend (`/estore-frontend`)
 - **Framework**: React 18 & Vite
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS & Framer Motion
+- **State**: Zustand (Local) & TanStack Query (Server)
 - **Routing**: React Router DOM (v6)
 - **Icons**: Lucide React
-- **API Client**: Axios
+- **Notifications**: Sonner
 
 ### ⚙️ Backend (`/estore-backend`)
 - **Framework**: Spring Boot 3.2.x
 - **Language**: Java 21
+- **Domain Areas**: Catalog, Customer, Inventory, Shopping, Billing, Reviews (DDD approach)
 - **Databases**: 
-  - MySQL 8.x (Spring Data JPA)
-  - MongoDB 6.x (Spring Data MongoDB)
+  - MySQL 8.x (Spring Data JPA) - *H2 Fallback supported*
+  - MongoDB 6.x (Spring Data MongoDB) - *Atlas support included*
 - **Security**: Spring Security + JWT Token Provider
 - **Build Tool**: Maven
 
