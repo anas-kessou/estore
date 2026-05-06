@@ -3,7 +3,7 @@ package com.estore.billing.controller;
 import com.estore.billing.dto.CreateOrderRequest;
 import com.estore.billing.dto.OrderDTO;
 import com.estore.billing.entity.OrderStatus;
-import com.estore.billing.service.OrderService;
+import com.estore.billing.service.BillingService;
 import com.estore.security.UserPrincipal;
 import com.estore.shared.dto.ApiResponse;
 import com.estore.shared.dto.PageResponse;
@@ -19,14 +19,14 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class OrderController {
 
-    private final OrderService orderService;
+    private final BillingService billingService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<OrderDTO>> createOrder(
             @AuthenticationPrincipal UserPrincipal currentUser,
             @Valid @RequestBody CreateOrderRequest request) {
 
-        OrderDTO order = orderService.createOrder(currentUser.getId(), request);
+        OrderDTO order = billingService.checkout(currentUser.getId(), request);
         return ResponseEntity.ok(ApiResponse.success("Order created successfully", order));
     }
 
@@ -36,19 +36,19 @@ public class OrderController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        PageResponse<OrderDTO> orders = orderService.getOrdersByUserId(userId, page, size);
+        PageResponse<OrderDTO> orders = billingService.getOrdersByUserId(userId, page, size);
         return ResponseEntity.ok(ApiResponse.success(orders));
     }
 
     @GetMapping("/{orderId}")
     public ResponseEntity<ApiResponse<OrderDTO>> getOrderById(@PathVariable Long orderId) {
-        OrderDTO order = orderService.getOrderById(orderId);
+        OrderDTO order = billingService.getOrderById(orderId);
         return ResponseEntity.ok(ApiResponse.success(order));
     }
 
     @GetMapping("/number/{orderNumber}")
     public ResponseEntity<ApiResponse<OrderDTO>> getOrderByNumber(@PathVariable String orderNumber) {
-        OrderDTO order = orderService.getOrderByNumber(orderNumber);
+        OrderDTO order = billingService.getOrderByNumber(orderNumber);
         return ResponseEntity.ok(ApiResponse.success(order));
     }
 
@@ -58,7 +58,7 @@ public class OrderController {
             @PathVariable Long orderId,
             @RequestParam OrderStatus status) {
 
-        OrderDTO order = orderService.updateOrderStatus(orderId, status);
+        OrderDTO order = billingService.updateOrderStatus(orderId, status);
         return ResponseEntity.ok(ApiResponse.success("Order status updated", order));
     }
 }

@@ -12,6 +12,7 @@ import com.estore.customer.entity.User;
 import com.estore.exception.BadRequestException;
 import com.estore.exception.InsufficientStockException;
 import com.estore.exception.ResourceNotFoundException;
+import com.estore.inventory.dto.InventoryDTO;
 import com.estore.inventory.service.InventoryService;
 import com.estore.shared.dto.PageResponse;
 import com.estore.shopping.entity.Cart;
@@ -31,7 +32,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class OrderService {
+public class BillingService {
 
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
@@ -41,29 +42,30 @@ public class OrderService {
     private final InventoryService inventoryService;
 
     @Transactional
-    public OrderDTO createOrder(Long userId, CreateOrderRequest request) {
+    public OrderDTO checkout(Long userId, CreateOrderRequest request) {
         Cart cart = cartRepository.findByUserIdWithItems(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart", "userId", userId));
 
         if (cart.getItems().isEmpty()) {
-            throw new BadRequestException("Cannot create order with empty cart");
+            throw new BadRequestException("Cannot checkout with an empty cart");
         }
 
-        // Validate stock for all items
+        // Validate stock in Inventory and prepare order items
         for (CartItem cartItem : cart.getItems()) {
-            Product product = cartItem.getProduct();
-            if (product.getStockQuantity() < cartItem.getQuantity()) {
-                throw new InsufficientStockException(product.getId(), cartItem.getQuantity(),
-                        product.getStockQuantity());
+            Long productId = cartItem.getProduct().getId();
+            int requestedQty = cartItem.getQuantity();
+
+            InventoryDTO inventory = inventoryService.getInventoryByProductId(productId);
+            if (inventory.getAvailableQuantity() < requestedQty) {
+                throw new InsufficientStockException(productId, requestedQty, inventory.getAvailableQuantity());
             }
         }
 
-        // Calculate total
+        // Calculate total and create Order
         BigDecimal totalAmount = cart.getItems().stream()
-                .map(CartItem::getSubtotal)
+                .map(item -> item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // Create order
         Order order = Order.builder()
                 .orderNumber("ORD-" + System.currentTimeMillis())
                 .totalAmount(totalAmount)
@@ -80,27 +82,21 @@ public class OrderService {
         user.setId(userId);
         order.setUser(user);
 
-        // Add order items and decrement stock
+        // Deduct stock and add items to order
         for (CartItem cartItem : cart.getItems()) {
-            Product product = cartItem.getProduct();
+            inventoryService.decrementStock(cartItem.getProduct().getId(), cartItem.getQuantity());
 
             OrderItem orderItem = OrderItem.builder()
-                    .product(product)
-                    .productName(product.getName())
-                    .productImageUrl(product.getImageUrl())
+                    .product(cartItem.getProduct())
+                    .productName(cartItem.getProduct().getName())
+                    .productImageUrl(cartItem.getProduct().getImageUrl())
                     .quantity(cartItem.getQuantity())
                     .unitPrice(cartItem.getUnitPrice())
                     .build();
-
             order.addItem(orderItem);
-
-            // Decrement inventory
-            inventoryService.decrementStock(product.getId(), cartItem.getQuantity());
         }
 
         order = orderRepository.save(order);
-
-        // Clear the cart
         cartService.clearCart(userId);
 
         return toOrderDTO(order);
