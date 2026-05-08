@@ -20,6 +20,24 @@ export class ErrorBoundary extends React.Component<
     return { hasError: true, error };
   }
 
+  componentDidCatch(error: any, info: any) {
+    // #region agent log
+    fetch('http://127.0.0.1:7763/ingest/dde67de3-8924-4544-a310-977ecb73aa4d', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '29f1c7' },
+      body: JSON.stringify({
+        sessionId: '29f1c7',
+        runId: 'blank-ui-1',
+        hypothesisId: 'H2',
+        location: 'src/components/ErrorBoundary.tsx:componentDidCatch',
+        message: 'caught react error',
+        data: { error: searilizeError(error), componentStack: String(info?.componentStack ?? '') },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+    // #endregion agent log
+  }
+
   render() {
     if (this.state.hasError) {
       return (

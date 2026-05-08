@@ -1,6 +1,11 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Navbar, Footer } from '@/shared/components';
 import { ProtectedRoute } from '@/core/guards/ProtectedRoute';
+import { RoleProtectedRoute } from '@/core/guards/RoleProtectedRoute';
+
+// Admin
+import { ImportProductsPageAdmin } from '@/features/admin/pages/ImportProductsPage';
+
 
 // Auth Pages
 import { LoginPage } from '@/features/auth/pages/LoginPage';
@@ -23,6 +28,22 @@ import { ProfilePage } from '@/features/profile/pages/ProfilePage';
 import './App.css';
 
 function App() {
+  // #region agent log
+  fetch('http://127.0.0.1:7763/ingest/dde67de3-8924-4544-a310-977ecb73aa4d', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '29f1c7' },
+    body: JSON.stringify({
+      sessionId: '29f1c7',
+      runId: 'blank-ui-1',
+      hypothesisId: 'H3',
+      location: 'src/App.tsx:render',
+      message: 'App render',
+      data: { path: window.location.pathname },
+      timestamp: Date.now(),
+    }),
+  }).catch(() => {});
+  // #endregion agent log
+
   return (
     <BrowserRouter>
       <div className="flex flex-col min-h-screen">
@@ -61,6 +82,17 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            {/* Admin Routes */}
+            <Route
+              path="/admin/import/products"
+              element={
+                <RoleProtectedRoute roles={['ROLE_ADMIN', 'ADMIN']}>
+                  <ImportProductsPageAdmin />
+                </RoleProtectedRoute>
+              }
+            />
+
           </Routes>
         </main>
         <Footer />

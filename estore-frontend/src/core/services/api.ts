@@ -38,6 +38,9 @@ export const API_ENDPOINTS = {
   // Reviews
   REVIEWS: '/reviews',
   REVIEWS_PRODUCT: (productId: number) => `/reviews/product/${productId}`,
+
+  // Admin
+  ADMIN_IMPORT_PRODUCTS_CSV: '/admin/import/products-csv',
 };
 
 export interface BackendApiResponse<T> {

@@ -56,28 +56,28 @@ public class DataInitializer implements CommandLineRunner {
         Category homeGarden = createCategory("Home & Garden", "Furniture, Decor", 4);
 
         // Create products
-        Product iphone = createProduct("iPhone 15 Pro", new BigDecimal("999.00"),
+        Product iphone = createProduct("IP15-PRO", "iPhone 15 Pro", new BigDecimal("999.00"),
                 "The latest iPhone with A17 Pro chip", electronics, 50, true);
-        Product galaxy = createProduct("Samsung Galaxy S24", new BigDecimal("849.00"),
+        Product galaxy = createProduct("S24-GALAXY", "Samsung Galaxy S24", new BigDecimal("849.00"),
                 "Samsung's latest flagship smartphone", electronics, 45, true);
-        Product macbook = createProduct("MacBook Air M3", new BigDecimal("1099.00"),
+        Product macbook = createProduct("MACBOOK-AIR-M3", "MacBook Air M3", new BigDecimal("1099.00"),
                 "Apple's lightest and most powerful laptop", electronics, 30, true);
-        Product airpods = createProduct("AirPods Pro 2", new BigDecimal("249.00"),
+        Product airpods = createProduct("AIRPODS-PRO-2", "AirPods Pro 2", new BigDecimal("249.00"),
                 "Premium wireless earbuds with noise cancellation", electronics, 100, true);
 
-        Product cleanCode = createProduct("Clean Code", new BigDecimal("45.00"),
+        Product cleanCode = createProduct("BOOK-CLEAN-CODE", "Clean Code", new BigDecimal("45.00"),
                 "A Handbook of Agile Software Craftsmanship by Robert C. Martin", books, 200, true);
-        Product designPatterns = createProduct("Design Patterns", new BigDecimal("55.00"),
+        Product designPatterns = createProduct("BOOK-DESIGN-PATTERNS", "Design Patterns", new BigDecimal("55.00"),
                 "Elements of Reusable Object-Oriented Software", books, 150, true);
 
-        Product airMax = createProduct("Nike Air Max 90", new BigDecimal("129.00"),
+        Product airMax = createProduct("SHOE-AIR-MAX-90", "Nike Air Max 90", new BigDecimal("129.00"),
                 "Classic running shoes with Air cushioning", sports, 75, true);
-        Product yogaMat = createProduct("Premium Yoga Mat", new BigDecimal("39.99"),
+        Product yogaMat = createProduct("YOGA-MAT-PREMIUM", "Premium Yoga Mat", new BigDecimal("39.99"),
                 "Non-slip yoga mat for all practices", sports, 120, true);
 
-        Product lamp = createProduct("Modern Table Lamp", new BigDecimal("79.00"),
+        Product lamp = createProduct("HG-LAMP-TABLE-MODERN", "Modern Table Lamp", new BigDecimal("79.00"),
                 "Contemporary LED table lamp with adjustable brightness", homeGarden, 60, false);
-        Product vase = createProduct("Ceramic Flower Vase", new BigDecimal("35.00"),
+        Product vase = createProduct("HG-VASE-CERAMIC-FLOWER", "Ceramic Flower Vase", new BigDecimal("35.00"),
                 "Handcrafted ceramic vase for fresh flowers", homeGarden, 80, false);
 
         log.info("Sample data initialization completed!");
@@ -126,9 +126,10 @@ public class DataInitializer implements CommandLineRunner {
         return categoryRepository.save(category);
     }
 
-    private Product createProduct(String name, BigDecimal price, String description,
+    private Product createProduct(String externalId, String name, BigDecimal price, String description,
                                    Category category, int stock, boolean active) {
         Product product = Product.builder()
+                .externalId(externalId)
                 .name(name)
                 .price(price)
                 .description(description)

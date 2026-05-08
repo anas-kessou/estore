@@ -1,0 +1,12 @@
+{"sessionId":"29f1c7","runId":"blank-ui-1","timestamp":1778244474893,"hypothesisId":"H1","location":"src/main.tsx:bootstrap","message":"bootstrap","data":{"hasRoot":true,"userAgent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"}}
+{"sessionId":"29f1c7","runId":"blank-ui-1","timestamp":1778244474901,"hypothesisId":"H3","location":"src/main.tsx:after-render-call","message":"render invoked","data":{}}
+{"sessionId":"29f1c7","runId":"blank-ui-1","hypothesisId":"H3","location":"src/App.tsx:render","message":"App render","data":{"path":"/admin"},"timestamp":1778244474917}
+{"sessionId":"29f1c7","runId":"blank-ui-1","hypothesisId":"H3","location":"src/App.tsx:render","message":"App render","data":{"path":"/admin"},"timestamp":1778244474918}
+{"sessionId":"29f1c7","runId":"blank-ui-1","timestamp":1778244702574,"hypothesisId":"H1","location":"src/main.tsx:bootstrap","message":"bootstrap","data":{"hasRoot":true,"userAgent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Cursor/3.3.27 Chrome/142.0.7444.265 Electron/39.8.1 Safari/537.36"}}
+{"sessionId":"29f1c7","runId":"blank-ui-1","timestamp":1778244702580,"hypothesisId":"H3","location":"src/main.tsx:after-render-call","message":"render invoked","data":{}}
+{"sessionId":"29f1c7","runId":"blank-ui-1","hypothesisId":"H3","location":"src/App.tsx:render","message":"App render","data":{"path":"/"},"timestamp":1778244702593}
+{"sessionId":"29f1c7","runId":"blank-ui-1","hypothesisId":"H3","location":"src/App.tsx:render","message":"App render","data":{"path":"/"},"timestamp":1778244702594}
+{"sessionId":"29f1c7","runId":"blank-ui-1","timestamp":1778244703112,"hypothesisId":"H1","location":"src/main.tsx:bootstrap","message":"bootstrap","data":{"hasRoot":true,"userAgent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Cursor/3.3.27 Chrome/142.0.7444.265 Electron/39.8.1 Safari/537.36"}}
+{"sessionId":"29f1c7","runId":"blank-ui-1","timestamp":1778244703114,"hypothesisId":"H3","location":"src/main.tsx:after-render-call","message":"render invoked","data":{}}
+{"sessionId":"29f1c7","runId":"blank-ui-1","hypothesisId":"H3","location":"src/App.tsx:render","message":"App render","data":{"path":"/"},"timestamp":1778244703121}
+{"sessionId":"29f1c7","runId":"blank-ui-1","hypothesisId":"H3","location":"src/App.tsx:render","message":"App render","data":{"path":"/"},"timestamp":1778244703121}

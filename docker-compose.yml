@@ -1,0 +1,61 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: estore-mongo
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  mysql:
+    image: mysql:8
+    container_name: estore-mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: estore
+      MYSQL_USER: estore
+      MYSQL_PASSWORD: estorepassword
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  backend:
+    build:
+      context: ./estore-backend
+    container_name: estore-backend
+    ports:
+      - "8080:8080"
+    environment:
+      # Spring datasource (backend application.yml reads these)
+      DB_URL: jdbc:mysql://mysql:3306/estore?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: estore
+      DB_PASSWORD: estorepassword
+      DB_DRIVER: com.mysql.cj.jdbc.Driver
+      HIBERNATE_DIALECT: org.hibernate.dialect.MySQLDialect
+
+      # Mongo for reviews
+      # (match backend default schema: backend expects Mongo URI in MONGO_URI)
+      MONGO_URI: mongodb://mongo:27017/estore_reviews
+
+      # JWT
+      JWT_SECRET: dev_jwt_secret_ChangeMeToSomethingLongEnough_AndRandom
+      JWT_EXPIRATION: 86400000
+    depends_on:
+      - mysql
+      - mongo
+
+  frontend:
+    build:
+      context: ./estore-frontend
+    container_name: estore-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_BASE_URL: http://backend:8080/api
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:
+  mysql_data:

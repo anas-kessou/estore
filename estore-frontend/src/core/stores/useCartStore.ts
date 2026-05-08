@@ -12,6 +12,7 @@ interface CartState {
   addItem: (userId: number, product: Product, quantity: number) => Promise<void>;
   updateQuantity: (userId: number, itemId: number, quantity: number) => Promise<void>;
   removeItem: (userId: number, itemId: number) => Promise<void>;
+
   clearLocalCart: () => void;
 }
 
@@ -42,8 +43,9 @@ export const useCartStore = create<CartState>((set, get) => ({
 
   updateQuantity: async (userId, itemId, quantity) => {
     try {
-      await CartService.updateItemQuantity(userId, itemId, quantity);
+      await CartService.updateCartItem(itemId, quantity);
       await get().fetchCart(userId);
+
     } catch (err: any) {
       set({ error: err.message });
     }
@@ -51,8 +53,9 @@ export const useCartStore = create<CartState>((set, get) => ({
 
   removeItem: async (userId, itemId) => {
     try {
-      await CartService.removeItem(userId, itemId);
+      await CartService.removeFromCart(itemId);
       await get().fetchCart(userId);
+
     } catch (err: any) {
       set({ error: err.message });
     }

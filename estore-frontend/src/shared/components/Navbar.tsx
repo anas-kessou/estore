@@ -37,8 +37,14 @@ export const Navbar = () => {
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 text-2xl font-extrabold tracking-tight text-indigo-600 hover:text-indigo-500 transition-colors">
-            <span className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xl">E</span>
-            Store
+            <img
+              src="/logo.jpeg"
+              alt="Store logo"
+              className="w-20 h-20 rounded-lg object-cover"
+              width={32}
+              height={32}
+            />
+           
           </Link>
 
           {/* Desktop Navigation */}
