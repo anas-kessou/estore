@@ -18,7 +18,7 @@ public class InventoryService {
     private final InventoryRepository inventoryRepository;
     private final ProductRepository productRepository;
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, noRollbackFor = ResourceNotFoundException.class)
     public InventoryDTO getInventoryByProductId(Long productId) {
         Inventory inventory = inventoryRepository.findByProductId(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Inventory", "productId", productId));

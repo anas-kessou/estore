@@ -37,6 +37,7 @@ export const CartPage = () => {
     try {
       await CartService.updateCartItem(itemId, newQuantity);
       await fetchCart();
+      toast.success('Cart updated');
     } catch (error) {
       toast.error('Failed to update quantity');
     } finally {

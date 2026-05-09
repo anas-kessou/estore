@@ -110,20 +110,53 @@ export const ProductListPage = () => {
               </button>
             </form>
 
-            <div className="flex items-center">
-              <Filter className="w-5 h-5 text-gray-500 mr-2" />
-              <select
-                value={selectedCategory}
-                onChange={(e) => handleCategoryChange(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3498db] focus:border-transparent outline-none"
+            <div className="relative" style={{ minWidth: '200px' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  const el = document.getElementById('category-dropdown');
+                  if (el) el.classList.toggle('hidden');
+                }}
+                className="w-full bg-white flex items-center justify-between px-4 py-3 border border-gray-200 rounded-xl shadow-sm hover:border-[#3498db] hover:shadow-md transition-all outline-none focus:ring-2 focus:ring-[#3498db]/50 group text-[#2c3e50] font-medium"
               >
-                <option value="">All Categories</option>
+                <div className="flex items-center gap-2">
+                  <Filter className="w-4 h-4 text-[#3498db]" />
+                  <span>
+                    {selectedCategory 
+                      ? categories.find(c => String(c.id) === selectedCategory)?.name || 'All Categories'
+                      : 'All Categories'}
+                  </span>
+                </div>
+                <svg className="w-4 h-4 text-gray-400 group-hover:text-[#3498db] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+              
+              <div id="category-dropdown" className="hidden absolute z-50 mt-2 w-full bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden py-1 backdrop-blur-sm">
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleCategoryChange('');
+                    document.getElementById('category-dropdown')?.classList.add('hidden');
+                  }}
+                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center gap-2 ${!selectedCategory ? 'bg-[#3498db]/10 text-[#3498db] font-bold' : 'text-gray-700 hover:bg-gray-50'}`}
+                >
+                  <div className={`w-1.5 h-1.5 rounded-full ${!selectedCategory ? 'bg-[#3498db]' : 'bg-transparent'}`}></div>
+                  All Categories
+                </button>
                 {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
+                  <button
+                    key={category.id}
+                    type="button"
+                    onClick={() => {
+                      handleCategoryChange(String(category.id));
+                      document.getElementById('category-dropdown')?.classList.add('hidden');
+                    }}
+                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center gap-2 ${selectedCategory === String(category.id) ? 'bg-[#3498db]/10 text-[#3498db] font-bold' : 'text-gray-700 hover:bg-gray-50'}`}
+                  >
+                    <div className={`w-1.5 h-1.5 rounded-full ${selectedCategory === String(category.id) ? 'bg-[#3498db]' : 'bg-transparent'}`}></div>
                     {category.name}
-                  </option>
+                  </button>
                 ))}
-              </select>
+              </div>
             </div>
           </div>
         </div>

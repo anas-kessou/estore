@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { AuthService } from '@/core/services';
 import { User } from '@/shared/types';
 import { User as UserIcon, Mail, Phone, MapPin, Save } from 'lucide-react';
+import { toast } from 'sonner';
 
 export const ProfilePage = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -15,7 +16,6 @@ export const ProfilePage = () => {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -53,7 +53,6 @@ export const ProfilePage = () => {
     if (!user?.id) return;
 
     setSaving(true);
-    setMessage({ type: '', text: '' });
 
     try {
       await AuthService.updateProfile(user.id, {
@@ -62,9 +61,9 @@ export const ProfilePage = () => {
         city: formData.city,
         country: formData.country,
       });
-      setMessage({ type: 'success', text: 'Profile updated successfully!' });
+      toast.success('Profile updated successfully!');
     } catch (error) {
-      setMessage({ type: 'error', text: 'Failed to update profile' });
+      toast.error('Failed to update profile');
     } finally {
       setSaving(false);
     }
@@ -101,17 +100,6 @@ export const ProfilePage = () => {
             </div>
           </div>
 
-          {message.text && (
-            <div
-              className={`p-4 rounded-lg mb-6 ${
-                message.type === 'success'
-                  ? 'bg-green-100 text-green-700 border border-green-400'
-                  : 'bg-red-100 text-red-700 border border-red-400'
-              }`}
-            >
-              {message.text}
-            </div>
-          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-2 gap-4">

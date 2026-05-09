@@ -51,8 +51,10 @@ public class Cart {
     }
 
     public void removeItem(CartItem item) {
-        items.remove(item);
-        item.setCart(null);
+        if (item != null) {
+            items.removeIf(i -> i.getId() != null && i.getId().equals(item.getId()));
+            item.setCart(null);
+        }
     }
 
     public void clearItems() {

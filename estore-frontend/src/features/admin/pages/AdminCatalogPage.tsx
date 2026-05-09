@@ -69,7 +69,7 @@ export const AdminCatalogPage = () => {
     try {
       const [cats, prods] = await Promise.all([
         CatalogService.getCategories(),
-        CatalogService.getProducts(0, 100).then(res => res.content)
+        CatalogService.getProducts(0, 5000).then(res => res.content) // High limit to show all products imported
       ]);
       setCategories(cats);
       setProducts(prods);
@@ -94,7 +94,7 @@ export const AdminCatalogPage = () => {
       setEditingCategory(null);
       fetchData();
     } catch (error) {
-      toast.error('Save failed');
+      toast.error('Save failed: ' + (error as Error).message);
     }
   };
 
@@ -112,7 +112,7 @@ export const AdminCatalogPage = () => {
       setEditingProduct(null);
       fetchData();
     } catch (error) {
-      toast.error('Save failed');
+      toast.error('Save failed: ' + (error as Error).message);
     }
   };
 
@@ -123,7 +123,7 @@ export const AdminCatalogPage = () => {
       toast.success('Product deleted');
       fetchData();
     } catch (error) {
-      toast.error('Delete failed');
+      toast.error('Delete failed: ' + (error as Error).message);
     }
   };
 
@@ -136,7 +136,7 @@ export const AdminCatalogPage = () => {
       toast.success('Import complete');
       fetchData();
     } catch (error) {
-      toast.error('Import failed');
+      toast.error('Import failed: ' + (error as Error).message);
     } finally {
       setImportLoading(false);
     }

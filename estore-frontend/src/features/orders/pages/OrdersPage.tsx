@@ -75,7 +75,7 @@ export const OrdersPage = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {orders.map((order) => (
+            {orders.map((order, index) => (
               <div key={order.id} className="bg-white rounded-lg shadow-md overflow-hidden">
                 <div
                   onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
@@ -83,7 +83,11 @@ export const OrdersPage = () => {
                 >
                   <div>
                     <div className="flex items-center gap-4">
-                      <span className="font-semibold text-[#2c3e50]">Order #{order.id}</span>
+                      <span className="font-semibold text-[#2c3e50]">
+                        {order.orderNumber.startsWith('#') 
+                          ? `Order ${order.orderNumber.split('-')[1] ? '#' + order.orderNumber.split('-')[1] : order.orderNumber}`
+                          : `Order #${order.orderNumber}`}
+                      </span>
                       <span className={`px-3 py-1 rounded-full text-sm ${getStatusColor(order.status)}`}>
                         {order.status}
                       </span>

@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, User, LogOut, Package, Menu, X } from 'lucide-react';
 import { AuthService, AUTH_CHANGED_EVENT } from '@/core/services/auth.service';
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 
 export const Navbar = () => {
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ export const Navbar = () => {
     AuthService.logout();
     setIsAuthenticated(false);
     setUser(null);
+    toast.success('Logged out successfully');
     navigate('/login');
   };
 

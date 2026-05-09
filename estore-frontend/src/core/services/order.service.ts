@@ -32,6 +32,7 @@ interface CreateOrderPayload {
 
 const mapOrder = (order: BackendOrderDTO): Order => ({
   id: order.id,
+  orderNumber: order.orderNumber,
   userId: order.userId,
   orderDate: order.orderDate,
   totalAmount: Number(order.totalAmount),

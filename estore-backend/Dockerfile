@@ -1,22 +1,17 @@
-# Stage 1: Build with Maven
-FROM maven:3.9-eclipse-temurin-17 AS builder
-
+# Stage 1: Build the application
+FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
-
-# Copy pom first to leverage Docker layer caching
-COPY pom.xml ./
-RUN mvn -q -DskipTests dependency:go-offline
-
-# Copy source and build
+COPY pom.xml .
+# Pre-download dependencies to speed up builds
+RUN mvn dependency:go-offline -B
 COPY src ./src
-RUN mvn -q -DskipTests package
+RUN mvn package -DskipTests
 
-# Stage 2: Run with slim JRE
+# Stage 2: Run the application
 FROM eclipse-temurin:17-jre-jammy
-
 WORKDIR /app
-COPY --from=builder /app/target/estore-backend-1.0.0.jar app.jar
+COPY --from=build /app/target/estore-backend-1.0.0.jar app.jar
 
 EXPOSE 8080
 
-CMD ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

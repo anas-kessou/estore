@@ -128,7 +128,12 @@ public class AdminProductService {
         // Cleanup Mongo reviews by productId
         reviewRepository.deleteByProductId(id);
 
-        productRepository.delete(product);
+        try {
+            productRepository.delete(product);
+            productRepository.flush();
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            throw new BadRequestException("Cannot delete product: it is currently referenced in shopping carts or orders. Please deactivate it instead.");
+        }
     }
 
     @Transactional
@@ -146,7 +151,12 @@ public class AdminProductService {
         // Cleanup Mongo reviews by productId (sync requirement)
         reviewRepository.deleteByProductId(productId);
 
-        productRepository.delete(product);
+        try {
+            productRepository.delete(product);
+            productRepository.flush();
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            throw new BadRequestException("Cannot delete product: it is currently referenced in shopping carts or orders. Please deactivate it instead.");
+        }
 
         return AdminDeleteProductResponse.builder()
                 .externalId(externalId.trim())

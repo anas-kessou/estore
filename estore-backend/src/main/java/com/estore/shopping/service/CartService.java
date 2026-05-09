@@ -114,7 +114,8 @@ public class CartService {
             throw new BadRequestException("Cart item does not belong to this cart");
         }
 
-        cartItemRepository.delete(item);
+        cart.removeItem(item);
+        cartRepository.save(cart);
     }
 
     @Transactional

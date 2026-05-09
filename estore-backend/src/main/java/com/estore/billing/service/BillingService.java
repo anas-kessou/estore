@@ -66,8 +66,11 @@ public class BillingService {
                 .map(item -> item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        long orderCount = orderRepository.countByUserId(userId);
+        String sequentialNumber = String.format("#%d-%d", userId, orderCount + 1);
+
         Order order = Order.builder()
-                .orderNumber("ORD-" + System.currentTimeMillis())
+                .orderNumber(sequentialNumber)
                 .totalAmount(totalAmount)
                 .status(OrderStatus.PENDING)
                 .shippingAddress(request.getShippingAddress())
