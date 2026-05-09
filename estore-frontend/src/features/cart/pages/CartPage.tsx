@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CartService, AuthService, OrderService } from '@/core/services';
 import { CartItem } from '@/shared/types';
 import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
+import { toast } from 'sonner';
 
 export const CartPage = () => {
   const navigate = useNavigate();
@@ -37,7 +38,7 @@ export const CartPage = () => {
       await CartService.updateCartItem(itemId, newQuantity);
       await fetchCart();
     } catch (error) {
-      alert('Failed to update quantity');
+      toast.error('Failed to update quantity');
     } finally {
       setUpdating(null);
     }
@@ -50,32 +51,26 @@ export const CartPage = () => {
     try {
       await CartService.removeFromCart(itemId);
       await fetchCart();
-    } catch (error) {
-      alert('Failed to remove item');
+      toast.success('Item removed from cart');
+    } catch (error: any) {
+      toast.error(error?.message ? `Failed to remove item: ${error.message}` : 'Failed to remove item');
     } finally {
       setUpdating(null);
     }
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     const user = AuthService.getCurrentUser();
     if (!user?.id) {
-      alert('Please login to checkout');
+      toast.error('Please login to checkout');
+      navigate('/login');
       return;
     }
     if (cartItems.length === 0) {
-      alert('Your cart is empty');
+      toast.error('Your cart is empty');
       return;
     }
-    try {
-      await OrderService.createOrder(user.id);
-      alert('Order placed successfully!');
-      await CartService.clearCart(user.id);
-      setCartItems([]);
-      navigate('/orders');
-    } catch (error) {
-      alert('Failed to place order. Please try again.');
-    }
+    navigate('/checkout');
   };
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
@@ -110,11 +105,11 @@ export const CartPage = () => {
           <div className="space-y-4">
             {cartItems.map((item) => (
               <div key={item.id} className="bg-white rounded-lg shadow-md p-4 flex items-center">
-                <img
-                  src={item.product.imageUrl || 'https://via.placeholder.com/100x100'}
-                  alt={item.product.name}
-                  className="w-24 h-24 object-cover rounded-lg"
-                />
+                  <img
+                    src={item.product.imageUrl || '/product-cart.png'}
+                    alt={item.product.name}
+                    className="w-24 h-24 object-cover rounded-lg"
+                  />
                 <div className="flex-1 ml-4">
                   <h3 className="text-lg font-semibold text-[#2c3e50]">{item.product.name}</h3>
                   <p className="text-[#27ae60] font-semibold">${item.unitPrice.toFixed(2)}</p>
@@ -130,8 +125,8 @@ export const CartPage = () => {
                   <span className="w-12 text-center font-semibold">{item.quantity}</span>
                   <button
                     onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                    disabled={updating === item.id}
-                    className="p-2 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+                    disabled={updating === item.id || item.quantity >= (item.availableStock ?? 999)}
+                    className="p-2 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -143,6 +138,7 @@ export const CartPage = () => {
                   onClick={() => handleRemoveItem(item.id)}
                   disabled={updating === item.id}
                   className="ml-4 p-2 text-[#e74c3c] hover:bg-red-50 rounded-lg disabled:opacity-50"
+                  aria-label="Remove item from cart"
                 >
                   <Trash2 className="w-5 h-5" />
                 </button>

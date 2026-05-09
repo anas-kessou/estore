@@ -7,9 +7,15 @@ interface BackendProductDTO {
   price: number;
   description: string;
   imageUrl?: string;
+  imageUrls?: string;
   stockQuantity?: number;
+  availableStock?: number;
+  inStock?: boolean;
+  lowStock?: boolean;
   categoryId?: number;
   categoryName?: string;
+  active?: boolean;
+  featured?: boolean;
 }
 
 const mapProduct = (product: BackendProductDTO): Product => ({
@@ -23,12 +29,21 @@ const mapProduct = (product: BackendProductDTO): Product => ({
         id: product.categoryId,
         name: product.categoryName || 'Uncategorized',
         description: '',
+        displayOrder: 0,
+        active: true,
       }
     : undefined,
+  categoryName: product.categoryName,
+  categoryId: product.categoryId,
   inventory: {
     id: product.id,
-    quantity: product.stockQuantity ?? 0,
+    quantity: product.availableStock ?? product.stockQuantity ?? 0,
   },
+  active: product.active ?? true,
+  featured: product.featured,
+  inStock: product.inStock,
+  lowStock: product.lowStock,
+  availableStock: product.availableStock ?? 0,
 });
 
 const mapProductPage = (page: PageResponse<BackendProductDTO>): PageResponse<Product> => ({

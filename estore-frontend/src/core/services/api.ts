@@ -40,8 +40,18 @@ export const API_ENDPOINTS = {
   REVIEWS_PRODUCT: (productId: number) => `/reviews/product/${productId}`,
 
   // Admin
-  ADMIN_IMPORT_PRODUCTS_CSV: '/admin/import/products-csv',
+  // Categories
+  ADMIN_CATEGORIES: '/admin/categories',
+  ADMIN_CATEGORY_BY_ID: (id: number) => `/admin/categories/${id}`,
+
+  // Products
+  ADMIN_IMPORT_PRODUCTS_CSV: '/admin/import/products/csv',
+  ADMIN_UPSERT_PRODUCT: '/admin/import/products/upsert',
+  ADMIN_DELETE_PRODUCT: (id: number) => `/admin/import/products/${id}`,
+  ADMIN_DELETE_PRODUCT_BY_EXTERNAL_ID: (externalId: string) =>
+    `/admin/import/products/external/${externalId}`,
 };
+
 
 export interface BackendApiResponse<T> {
   success: boolean;

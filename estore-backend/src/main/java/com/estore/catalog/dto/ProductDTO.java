@@ -20,6 +20,9 @@ public class ProductDTO {
     private boolean active;
     private boolean featured;
     private Integer stockQuantity;
+    private Integer availableStock;
+    private boolean inStock;
+    private boolean lowStock;
     private Long categoryId;
     private String categoryName;
     private Double averageRating;

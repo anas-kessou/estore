@@ -10,6 +10,8 @@ public interface ReviewRepository extends MongoRepository<Review, String> {
 
     List<Review> findByProductIdOrderByCreatedAtDesc(Long productId);
 
+    void deleteByProductId(Long productId);
+
     List<Review> findByUserIdOrderByCreatedAtDesc(Long userId);
 
     List<Review> findByProductIdAndApprovedTrueOrderByCreatedAtDesc(Long productId);

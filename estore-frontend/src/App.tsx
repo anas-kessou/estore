@@ -4,7 +4,7 @@ import { ProtectedRoute } from '@/core/guards/ProtectedRoute';
 import { RoleProtectedRoute } from '@/core/guards/RoleProtectedRoute';
 
 // Admin
-import { ImportProductsPageAdmin } from '@/features/admin/pages/ImportProductsPage';
+import { AdminCatalogPage } from '@/features/admin/pages/AdminCatalogPage';
 
 
 // Auth Pages
@@ -18,6 +18,7 @@ import { ProductDetailPage } from '@/features/catalog/pages/ProductDetailPage';
 
 // Cart Pages
 import { CartPage } from '@/features/cart/pages/CartPage';
+import { CheckoutPage } from '@/features/cart/pages/CheckoutPage';
 
 // Orders Pages
 import { OrdersPage } from '@/features/orders/pages/OrdersPage';
@@ -28,21 +29,7 @@ import { ProfilePage } from '@/features/profile/pages/ProfilePage';
 import './App.css';
 
 function App() {
-  // #region agent log
-  fetch('http://127.0.0.1:7763/ingest/dde67de3-8924-4544-a310-977ecb73aa4d', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '29f1c7' },
-    body: JSON.stringify({
-      sessionId: '29f1c7',
-      runId: 'blank-ui-1',
-      hypothesisId: 'H3',
-      location: 'src/App.tsx:render',
-      message: 'App render',
-      data: { path: window.location.pathname },
-      timestamp: Date.now(),
-    }),
-  }).catch(() => {});
-  // #endregion agent log
+
 
   return (
     <BrowserRouter>
@@ -57,12 +44,19 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
-            {/* Protected Routes */}
             <Route
               path="/cart"
               element={
                 <ProtectedRoute>
                   <CartPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/checkout"
+              element={
+                <ProtectedRoute>
+                  <CheckoutPage />
                 </ProtectedRoute>
               }
             />
@@ -85,10 +79,10 @@ function App() {
 
             {/* Admin Routes */}
             <Route
-              path="/admin/import/products"
+              path="/admin/catalog"
               element={
                 <RoleProtectedRoute roles={['ROLE_ADMIN', 'ADMIN']}>
-                  <ImportProductsPageAdmin />
+                  <AdminCatalogPage />
                 </RoleProtectedRoute>
               }
             />

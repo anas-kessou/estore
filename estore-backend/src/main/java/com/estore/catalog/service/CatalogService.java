@@ -27,6 +27,7 @@ public class CatalogService {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
     private final ReviewRepository reviewRepository;
+    private final com.estore.inventory.service.InventoryService inventoryService;
 
     @Transactional(readOnly = true)
     public List<CategoryDTO> getAllCategories() {
@@ -136,6 +137,18 @@ public class CatalogService {
             // Ignore if review repository is not available
         }
 
+        com.estore.inventory.dto.InventoryDTO inventory;
+        try {
+            inventory = inventoryService.getInventoryByProductId(product.getId());
+        } catch (Exception e) {
+            // Fallback if inventory is missing
+            inventory = com.estore.inventory.dto.InventoryDTO.builder()
+                    .availableQuantity(product.getStockQuantity() != null ? product.getStockQuantity() : 0)
+                    .inStock((product.getStockQuantity() != null ? product.getStockQuantity() : 0) > 0)
+                    .lowStock(false)
+                    .build();
+        }
+
         return ProductDTO.builder()
                 .id(product.getId())
                 .name(product.getName())
@@ -145,7 +158,11 @@ public class CatalogService {
                 .imageUrls(product.getImageUrls())
                 .active(product.isActive())
                 .featured(product.isFeatured())
-                .stockQuantity(product.getStockQuantity())
+                .stockQuantity(inventory.getAvailableQuantity())
+                .availableStock(inventory.getAvailableQuantity())
+                .inStock(inventory.isInStock())
+                .lowStock(inventory.isLowStock())
+
                 .categoryId(product.getCategory() != null ? product.getCategory().getId() : null)
                 .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
                 .averageRating(avgRating > 0 ? avgRating : null)

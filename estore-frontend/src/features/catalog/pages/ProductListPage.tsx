@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ProductCard } from '@/shared/components';
 import { CatalogService, CartService, AuthService } from '@/core/services';
-import { Product, Category } from '@/shared/types';
-import { Search, Filter } from 'lucide-react';
+import { Product, Category, PageResponse } from '@/shared/types';
+import { Search, Filter, SlidersHorizontal, ShoppingCart, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export const ProductListPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -71,9 +72,9 @@ export const ProductListPage = () => {
     if (user?.id) {
       try {
         await CartService.addToCart(user.id, product, 1);
-        alert('Added to cart!');
+        toast.success(`Added ${product.name} to cart`);
       } catch (error) {
-        alert('Failed to add to cart');
+        toast.error('Failed to add to cart');
       }
     } else {
       alert('Please login to add items to cart');

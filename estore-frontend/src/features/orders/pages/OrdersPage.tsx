@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { OrderService, AuthService } from '@/core/services';
 import { Order } from '@/shared/types';
-import { Package, ChevronRight } from 'lucide-react';
+import { Package, Clock, CheckCircle2, XCircle, ChevronRight, ShoppingBag } from 'lucide-react';
+import { toast } from 'sonner';
+
 
 export const OrdersPage = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -27,6 +29,11 @@ export const OrdersPage = () => {
     fetchOrders();
   }, []);
 
+  const isCancellable = (status: string) => {
+    const s = status.toLowerCase();
+    return s === 'pending' || s === 'processing';
+  };
+
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'completed':
@@ -43,6 +50,7 @@ export const OrdersPage = () => {
         return 'bg-gray-500 text-white';
     }
   };
+
 
   if (loading) {
     return (
@@ -103,13 +111,36 @@ export const OrdersPage = () => {
                 {expandedOrder === order.id && (
                   <div className="border-t border-gray-200">
                     <div className="p-4 bg-gray-50">
-                      <h4 className="font-semibold text-[#2c3e50] mb-4">Order Items</h4>
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="font-semibold text-[#2c3e50]">Order Items</h4>
+                        {isCancellable(order.status) && (
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (!confirm('Cancel this order?')) return;
+                              try {
+                                await OrderService.cancelOrder(order.id as number);
+                                toast.success('Order cancelled successfully');
+                                setOrders(orders.map(o => o.id === order.id ? { ...o, status: 'CANCELLED' } : o));
+                              } catch (error) {
+                                toast.error('Failed to cancel order');
+                              }
+                            }}
+                            className="flex items-center gap-2 px-3 py-2 rounded-lg text-[#e74c3c] hover:bg-red-50 disabled:opacity-50"
+                            aria-label="Cancel order"
+                          >
+                            <XCircle className="w-5 h-5" />
+                            <span className="font-semibold">Cancel</span>
+                          </button>
+                        )}
+                      </div>
+
                       <div className="space-y-3">
                         {order.items.map((item, index) => (
                           <div key={index} className="flex items-center justify-between">
                             <div className="flex items-center">
                               <img
-                                src={item.product.imageUrl || 'https://via.placeholder.com/50x50'}
+                                src={item.product.imageUrl || '/product.png'}
                                 alt={item.product.name}
                                 className="w-12 h-12 object-cover rounded"
                               />

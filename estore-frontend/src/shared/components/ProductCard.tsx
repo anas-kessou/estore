@@ -8,7 +8,8 @@ interface ProductCardProps {
 }
 
 export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
-  const inStock = product.inventory?.quantity ?? 0 > 0;
+  const inStock = product.inStock ?? (product.inventory?.quantity ?? 0 > 0);
+  const lowStock = product.lowStock && inStock;
 
   return (
     <div className="group bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 hover:border-indigo-100 transition-all duration-300 flex flex-col">
@@ -24,7 +25,12 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
               Sold Out
             </div>
           )}
-          {product.featured && inStock && (
+          {lowStock && (
+            <div className="absolute top-3 right-3 bg-orange-500/90 backdrop-blur text-white text-xs font-bold px-2.5 py-1 rounded-full">
+              Low Stock: {product.availableStock} left
+            </div>
+          )}
+          {product.featured && inStock && !lowStock && (
             <div className="absolute top-3 left-3 bg-amber-400 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
               Featured
             </div>
@@ -42,7 +48,12 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
             )}
             <div className="flex items-center gap-1 bg-slate-50 px-1.5 py-0.5 rounded-md">
               <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-              <span className="text-xs font-medium text-slate-600">4.5</span>
+              <span className="text-xs font-medium text-slate-600">
+                {product.averageRating ? product.averageRating.toFixed(1) : 'New'}
+              </span>
+              {product.reviewCount !== undefined && product.reviewCount > 0 && (
+                <span className="text-[10px] text-slate-400 font-normal">({product.reviewCount})</span>
+              )}
             </div>
           </div>
           

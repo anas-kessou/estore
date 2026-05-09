@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { CatalogService, CartService, ReviewService, AuthService } from '@/core/services';
+import { CatalogService, CartService, AuthService, ReviewService } from '@/core/services';
 import { Product, Review } from '@/shared/types';
-import { ShoppingCart, Star, ArrowLeft } from 'lucide-react';
+import { Star, ShoppingCart, Truck, ShieldCheck, RotateCcw, AlertTriangle, MessageSquare, Send, ArrowLeft } from 'lucide-react';
+import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCartStore } from '@/features/cart/store/useCartStore';
 
@@ -33,8 +34,8 @@ export const ProductDetailPage = () => {
     mutationFn: async ({ user, p, q }: { user: any, p: Product, q: number }) => {
       await addToCartAction(user.id, p, q);
     },
-    onSuccess: () => alert('Added to cart!'),
-    onError: () => alert('Failed to add to cart')
+    onSuccess: () => toast.success('Added to cart!'),
+    onError: () => toast.error('Failed to add to cart')
   });
 
   const reviewMutation = useMutation({
@@ -44,7 +45,9 @@ export const ProductDetailPage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reviews', id] });
       setNewReview({ rating: 5, comment: '' });
-    }
+      toast.success('Review submitted successfully!');
+    },
+    onError: () => toast.error('Failed to submit review')
   });
 
   const reviewLoading = reviewMutation.isPending;
@@ -52,7 +55,7 @@ export const ProductDetailPage = () => {
   const handleAddToCart = () => {
     const user = AuthService.getCurrentUser();
     if (!product || !user?.id) {
-      alert('Please login to add items to cart');
+      toast.error('Please login to add items to cart');
       return;
     }
     cartMutation.mutate({ user, p: product, q: quantity });
@@ -94,7 +97,9 @@ export const ProductDetailPage = () => {
     );
   }
 
-  const inStock = (product.inventory?.quantity ?? 0) > 0;
+  const inStock = product.inStock ?? ((product.inventory?.quantity ?? 0) > 0);
+  const lowStock = product.lowStock && inStock;
+  const availableStock = product.availableStock ?? product.inventory?.quantity ?? 0;
   const averageRating = reviews.length > 0
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
     : '0';
@@ -169,14 +174,18 @@ export const ProductDetailPage = () => {
                   </button>
                   <span className="px-4 py-2 border-x border-gray-300">{quantity}</span>
                   <button
-                    onClick={() => setQuantity((q) => q + 1)}
+                    onClick={() => setQuantity((q) => Math.min(availableStock, q + 1))}
                     className="px-4 py-2 hover:bg-gray-100"
                   >
                     +
                   </button>
                 </div>
-                <span className="text-gray-500">
-                  {product.inventory?.quantity ?? 0} in stock
+                <span className={`font-medium ${lowStock ? 'text-orange-600' : 'text-gray-500'}`}>
+                  {inStock 
+                    ? lowStock 
+                      ? `Only ${availableStock} left in stock!` 
+                      : `${availableStock} in stock`
+                    : 'Currently unavailable'}
                 </span>
               </div>
 

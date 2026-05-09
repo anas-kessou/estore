@@ -61,6 +61,11 @@ export const Navbar = () => {
           <div className="hidden md:flex items-center space-x-6">
             {isAuthenticated ? (
               <>
+                {(user?.role === 'ROLE_ADMIN' || user?.role === 'ADMIN') && (
+                  <Link to="/admin/catalog" className="px-5 py-2.5 bg-slate-900 text-white rounded-full text-xs font-black uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-lg shadow-slate-200">
+                    Admin
+                  </Link>
+                )}
                 <Link to="/cart" className="relative p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all">
                   <ShoppingCart className="w-5 h-5" />
                 </Link>

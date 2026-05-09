@@ -28,6 +28,9 @@ export interface Category {
   id: number;
   name: string;
   description: string;
+  imageUrl?: string;
+  displayOrder: number;
+  active: boolean;
 }
 
 // Product Types
@@ -36,10 +39,20 @@ export interface Product {
   name: string;
   price: number;
   imageUrl: string;
+  imageUrls?: string;
   description: string;
   category?: Category;
+  categoryId?: number;
+  categoryName?: string;
   inventory?: Inventory;
+  active: boolean;
   featured?: boolean;
+  stockQuantity?: number;
+  availableStock: number;
+  inStock?: boolean;
+  lowStock?: boolean;
+  averageRating?: number | null;
+  reviewCount?: number;
 }
 
 export interface Inventory {
@@ -52,6 +65,7 @@ export interface CartItem {
   id?: number;
   product: Product;
   quantity: number;
+  availableStock?: number;
   unitPrice: number;
 }
 

@@ -3,6 +3,7 @@ package com.estore.shopping.service;
 import com.estore.catalog.entity.Product;
 import com.estore.catalog.repository.ProductRepository;
 import com.estore.exception.BadRequestException;
+import com.estore.inventory.service.InventoryService;
 import com.estore.exception.InsufficientStockException;
 import com.estore.exception.ResourceNotFoundException;
 import com.estore.shopping.dto.*;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -27,6 +27,7 @@ public class CartService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
+    private final InventoryService inventoryService;
 
     @Transactional(readOnly = true)
     public CartDTO getCartByUserId(Long userId) {
@@ -43,9 +44,10 @@ public class CartService {
         Product product = productRepository.findByIdAndActiveTrue(request.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", request.getProductId()));
 
-        // Check stock
-        if (product.getStockQuantity() < request.getQuantity()) {
-            throw new InsufficientStockException(product.getId(), request.getQuantity(), product.getStockQuantity());
+        // Check stock from Inventory (available = quantity - reserved)
+        int available = inventoryService.getInventoryByProductId(product.getId()).getAvailableQuantity();
+        if (available < request.getQuantity()) {
+            throw new InsufficientStockException(product.getId(), request.getQuantity(), available);
         }
 
         Optional<CartItem> existingItem = cartItemRepository.findByCartIdAndProductId(cart.getId(), product.getId());
@@ -54,8 +56,9 @@ public class CartService {
             // Update quantity
             CartItem item = existingItem.get();
             int newQuantity = item.getQuantity() + request.getQuantity();
-            if (product.getStockQuantity() < newQuantity) {
-                throw new InsufficientStockException(product.getId(), newQuantity, product.getStockQuantity());
+            available = inventoryService.getInventoryByProductId(product.getId()).getAvailableQuantity();
+            if (available < newQuantity) {
+                throw new InsufficientStockException(product.getId(), newQuantity, available);
             }
             item.updateQuantity(newQuantity);
             cartItemRepository.save(item);
@@ -88,8 +91,9 @@ public class CartService {
 
         // Check stock
         Product product = item.getProduct();
-        if (product.getStockQuantity() < request.getQuantity()) {
-            throw new InsufficientStockException(product.getId(), request.getQuantity(), product.getStockQuantity());
+        int available = inventoryService.getInventoryByProductId(product.getId()).getAvailableQuantity();
+        if (available < request.getQuantity()) {
+            throw new InsufficientStockException(product.getId(), request.getQuantity(), available);
         }
 
         item.updateQuantity(request.getQuantity());
@@ -157,6 +161,7 @@ public class CartService {
                 .productName(item.getProduct().getName())
                 .productImageUrl(item.getProduct().getImageUrl())
                 .quantity(item.getQuantity())
+                .availableStock(inventoryService.getInventoryByProductId(item.getProduct().getId()).getAvailableQuantity())
                 .unitPrice(item.getUnitPrice())
                 .subtotal(item.getSubtotal())
                 .build();

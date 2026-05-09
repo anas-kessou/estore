@@ -1,22 +1,22 @@
-# Backend Dockerfile
-FROM eclipse-temurin:21-jdk-jammy
+# Stage 1: Build with Maven
+FROM maven:3.9-eclipse-temurin-17 AS builder
 
 WORKDIR /app
 
 # Copy pom first to leverage Docker layer caching
 COPY pom.xml ./
+RUN mvn -q -DskipTests dependency:go-offline
 
-# Download dependencies (offline cache)
-RUN apt-get update -qq && apt-get install -y -qq maven && mvn -q -DskipTests dependency:go-offline
-
-# Copy source
+# Copy source and build
 COPY src ./src
-
-# Build jar
 RUN mvn -q -DskipTests package
+
+# Stage 2: Run with slim JRE
+FROM eclipse-temurin:17-jre-jammy
+
+WORKDIR /app
+COPY --from=builder /app/target/estore-backend-1.0.0.jar app.jar
 
 EXPOSE 8080
 
-# Run the Spring Boot app
-CMD ["java", "-jar", "target/estore-backend-1.0.0.jar"]
-
+CMD ["java", "-jar", "app.jar"]

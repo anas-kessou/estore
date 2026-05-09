@@ -14,3 +14,5 @@ estore-frontend/.pnpm-store/
 # Environment files
 estore-backend/.env
 estore-frontend/.env
+
+TODO.md

@@ -155,6 +155,27 @@ public class BillingService {
         return toOrderDTO(order);
     }
 
+    @Transactional
+    public OrderDTO cancelOrderForUser(Long orderId, Long userId) {
+        Order order = orderRepository.findByIdWithItems(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
+
+        if (!order.getUser().getId().equals(userId)) {
+            throw new com.estore.exception.UnauthorizedException("You are not allowed to cancel this order");
+        }
+
+        // Only allow cancelling orders that are still pending/processing.
+        if (order.getStatus() == OrderStatus.CANCELLED || order.getStatus() == OrderStatus.REFUNDED) {
+            throw new BadRequestException("Order cannot be cancelled");
+        }
+
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new BadRequestException("Only pending orders can be cancelled");
+        }
+
+        return updateOrderStatus(orderId, OrderStatus.CANCELLED);
+    }
+
     private OrderDTO toOrderDTO(Order order) {
         List<OrderItemDTO> items = order.getItems().stream()
                 .map(this::toOrderItemDTO)

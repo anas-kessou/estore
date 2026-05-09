@@ -46,6 +46,8 @@ const mapOrder = (order: BackendOrderDTO): Order => ({
       imageUrl: item.productImageUrl || '',
       price: Number(item.unitPrice),
       description: '',
+      active: true,
+      availableStock: 0,
     },
   })),
 });
@@ -89,4 +91,15 @@ export const OrderService = {
       throw toApiError(error, 'Failed to fetch order');
     }
   },
+
+  cancelOrder: async (orderId: number): Promise<Order> => {
+    try {
+      const response = await apiClient.put(`/orders/${orderId}/cancel`);
+      const data = unwrapResponse<BackendOrderDTO>(response);
+      return mapOrder(data);
+    } catch (error) {
+      throw toApiError(error, 'Failed to cancel order');
+    }
+  },
 };
+

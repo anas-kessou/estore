@@ -7,6 +7,7 @@ interface BackendCartItemDTO {
   productName: string;
   productImageUrl?: string;
   quantity: number;
+  availableStock?: number;
   unitPrice: number;
   subtotal: number;
 }
@@ -24,6 +25,7 @@ interface BackendCartDTO {
 const mapCartItem = (item: BackendCartItemDTO): CartItem => ({
   id: item.id,
   quantity: item.quantity,
+  availableStock: item.availableStock,
   unitPrice: Number(item.unitPrice),
   product: {
     id: item.productId,
@@ -31,6 +33,8 @@ const mapCartItem = (item: BackendCartItemDTO): CartItem => ({
     imageUrl: item.productImageUrl || '',
     price: Number(item.unitPrice),
     description: '',
+    active: true,
+    availableStock: 0,
   },
 });
 
