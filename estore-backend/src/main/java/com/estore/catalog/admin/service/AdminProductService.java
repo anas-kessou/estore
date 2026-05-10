@@ -120,6 +120,64 @@ public class AdminProductService {
     }
 
     @Transactional
+    public AdminUpsertProductResponse updateById(Long id, AdminUpsertProductRequest request) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new com.estore.exception.ResourceNotFoundException("Product", "id", id));
+
+        if (request.getName() != null && !request.getName().isBlank()) {
+            product.setName(request.getName().trim());
+        }
+        if (request.getBrandDesc() != null) {
+            product.setDescription(request.getBrandDesc().isBlank() ? null : request.getBrandDesc().trim());
+        }
+        if (request.getSellPrice() != null) {
+            product.setPrice(request.getSellPrice());
+        }
+        if (request.getCategoryName() != null && !request.getCategoryName().isBlank()) {
+            String normalizedCategoryName = normalizeCategoryName(request.getCategoryName());
+            Category category = categoryRepository.findByName(normalizedCategoryName)
+                    .orElseGet(() -> categoryRepository.save(
+                            Category.builder()
+                                    .name(normalizedCategoryName)
+                                    .description(null)
+                                    .active(true)
+                                    .displayOrder(0)
+                                    .build()));
+            product.setCategory(category);
+        }
+        if (request.getActive() != null) {
+            product.setActive(request.getActive());
+        }
+        if (request.getFeatured() != null) {
+            product.setFeatured(request.getFeatured());
+        }
+        if (request.getStockQuantity() != null) {
+            product.setStockQuantity(request.getStockQuantity());
+        }
+        if (request.getImageUrl() != null && !request.getImageUrl().isBlank()) {
+            product.setImageUrl(request.getImageUrl().trim());
+        }
+
+        Product saved = productRepository.save(product);
+
+        // Sync Inventory
+        int stockQty = saved.getStockQuantity() != null ? saved.getStockQuantity() : 0;
+        try {
+            inventoryService.getInventoryByProductId(saved.getId());
+            inventoryService.updateInventory(saved.getId(), com.estore.inventory.dto.InventoryUpdateRequest.builder()
+                    .quantity(stockQty)
+                    .build());
+        } catch (com.estore.exception.ResourceNotFoundException ex) {
+            inventoryService.createInventoryForProduct(saved);
+        }
+
+        return AdminUpsertProductResponse.builder()
+                .productId(saved.getId())
+                .updated(true)
+                .build();
+    }
+
+    @Transactional
     public void deleteById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new com.estore.exception.ResourceNotFoundException(

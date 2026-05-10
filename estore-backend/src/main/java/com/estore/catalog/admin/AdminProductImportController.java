@@ -36,6 +36,14 @@ public class AdminProductImportController {
         return ResponseEntity.ok(ApiResponse.success("Product upserted successfully", response));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<AdminUpsertProductResponse>> updateProduct(
+            @PathVariable Long id,
+            @RequestBody AdminUpsertProductRequest request) {
+        AdminUpsertProductResponse response = adminProductService.updateById(id, request);
+        return ResponseEntity.ok(ApiResponse.success("Product updated successfully", response));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable Long id) {
         adminProductService.deleteById(id);

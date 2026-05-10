@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AdminService, ProductsCsvImportSummary } from '@/core/services/admin.service';
+import { AdminService, ProductsCsvImportSummary, AdminStatistics } from '@/core/services/admin.service';
 import { CatalogService } from '@/core/services/catalog.service';
 import { Category, Product } from '@/shared/types';
 import { 
@@ -16,11 +16,20 @@ import {
   ChevronRight,
   TrendingUp,
   Layers,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Search,
+  Filter,
+  BarChart3,
+  DollarSign,
+  Users,
+  ShoppingCart,
+  ArrowUpRight,
+  Clock,
+  Eye
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-type Tab = 'categories' | 'products' | 'import';
+type Tab = 'categories' | 'products' | 'import' | 'statistics';
 
 export const AdminCatalogPage = () => {
   const [activeTab, setActiveTab] = useState<Tab>('products');
@@ -60,6 +69,15 @@ export const AdminCatalogPage = () => {
   const [importLoading, setImportLoading] = useState(false);
   const [importSummary, setImportSummary] = useState<ProductsCsvImportSummary | null>(null);
 
+  // Statistics State
+  const [stats, setStats] = useState<AdminStatistics | null>(null);
+  const [statsLoading, setStatsLoading] = useState(false);
+
+  // Search & Filter State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterCategory, setFilterCategory] = useState<string>('All');
+  const [filterStatus, setFilterStatus] = useState<'All' | 'Active' | 'Draft'>('All');
+
   useEffect(() => {
     fetchData();
   }, [activeTab]);
@@ -73,12 +91,39 @@ export const AdminCatalogPage = () => {
       ]);
       setCategories(cats);
       setProducts(prods);
+      
+      if (activeTab === 'statistics') {
+        fetchStatistics();
+      }
     } catch (error) {
       toast.error('Failed to load catalog data');
     } finally {
       setLoading(false);
     }
   };
+
+  const fetchStatistics = async () => {
+    setStatsLoading(true);
+    try {
+      const data = await AdminService.getStatistics();
+      setStats(data);
+    } catch (error) {
+      toast.error('Failed to load statistics');
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
+  const filteredProducts = products.filter(prod => {
+    const matchesSearch = prod.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         prod.id?.toString().includes(searchQuery);
+    const matchesCategory = filterCategory === 'All' || prod.categoryName === filterCategory;
+    const matchesStatus = filterStatus === 'All' || 
+                         (filterStatus === 'Active' && prod.active) || 
+                         (filterStatus === 'Draft' && !prod.active);
+    
+    return matchesSearch && matchesCategory && matchesStatus;
+  });
 
   const handleCategorySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,8 +151,13 @@ export const AdminCatalogPage = () => {
         sellPrice: Number(productForm.sellPrice),
         stockQuantity: Number(productForm.stockQuantity)
       };
-      await AdminService.upsertProduct(payload);
-      toast.success(productForm.externalId ? 'Product updated' : 'Product created');
+      if (editingProduct) {
+        await AdminService.updateProduct(editingProduct.id, payload);
+        toast.success('Product updated');
+      } else {
+        await AdminService.upsertProduct(payload);
+        toast.success('Product created');
+      }
       setIsProductModalOpen(false);
       setEditingProduct(null);
       fetchData();
@@ -184,6 +234,7 @@ export const AdminCatalogPage = () => {
               { id: 'products', label: 'Products', icon: Package },
               { id: 'categories', label: 'Categories', icon: Tags },
               { id: 'import', label: 'Bulk Import', icon: Upload },
+              { id: 'statistics', label: 'Statistics', icon: BarChart3 },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -264,20 +315,62 @@ export const AdminCatalogPage = () => {
             )}
 
             {activeTab === 'products' && (
-              <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-                <table className="w-full text-left">
-                  <thead className="bg-slate-50 border-b border-slate-200">
-                    <tr>
-                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Product</th>
-                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Category</th>
-                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Price</th>
-                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Stock</th>
-                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-4 text-right"></th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200">
-                    {products.map((prod) => (
+              <div className="space-y-6">
+                {/* Search & Filter Bar */}
+                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4">
+                  <div className="flex-1 relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <input
+                      type="text"
+                      placeholder="Search by name or ID..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-12 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
+                    />
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl">
+                      <Filter className="w-4 h-4 text-slate-400" />
+                      <select 
+                        value={filterCategory}
+                        onChange={(e) => setFilterCategory(e.target.value)}
+                        className="bg-transparent border-none outline-none text-sm font-bold text-slate-700 pr-2"
+                      >
+                        <option value="All">All Categories</option>
+                        {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                      </select>
+                    </div>
+
+                    <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl">
+                      <CheckCircle2 className="w-4 h-4 text-slate-400" />
+                      <select 
+                        value={filterStatus}
+                        onChange={(e) => setFilterStatus(e.target.value as any)}
+                        className="bg-transparent border-none outline-none text-sm font-bold text-slate-700 pr-2"
+                      >
+                        <option value="All">All Status</option>
+                        <option value="Active">Published</option>
+                        <option value="Draft">Draft</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                  <table className="w-full text-left">
+                    <thead className="bg-slate-50 border-b border-slate-200">
+                      <tr>
+                        <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Product</th>
+                        <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Category</th>
+                        <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Price</th>
+                        <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Stock</th>
+                        <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-4 text-right"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200">
+                      {filteredProducts.map((prod) => (
                       <tr key={prod.id} className="hover:bg-slate-50/50 transition-colors group">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-3">
@@ -348,6 +441,132 @@ export const AdminCatalogPage = () => {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </div>
+            )}
+
+            {activeTab === 'statistics' && stats && (
+              <div className="space-y-8 animate-in fade-in duration-500">
+                {/* Overview Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {[
+                    { label: 'Total Revenue', value: `$${stats.totalRevenue.toLocaleString()}`, icon: DollarSign, color: 'emerald', trend: 'Lifetime' },
+                    { label: 'Total Orders', value: stats.totalOrders, icon: ShoppingCart, color: 'indigo', trend: 'Lifetime' },
+                    { label: 'Active Customers', value: stats.totalCustomers, icon: Users, color: 'blue', trend: 'Lifetime' },
+                    { label: 'Low Stock', value: stats.lowStockProducts, icon: AlertCircle, color: 'rose', trend: 'Needs Attention' },
+                  ].map((item, i) => (
+                    <div key={i} className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className={`p-3 rounded-2xl bg-${item.color}-50 text-${item.color}-600`}>
+                          <item.icon className="w-6 h-6" />
+                        </div>
+                        <span className={`text-xs font-bold px-2 py-1 rounded-lg bg-${item.color}-50 text-${item.color}-600`}>
+                          {item.trend}
+                        </span>
+                      </div>
+                      <div className="text-2xl font-black text-slate-900">{item.value}</div>
+                      <div className="text-sm font-bold text-slate-500 mt-1">{item.label}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* Top Selling Products */}
+                  <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                      <h3 className="font-bold text-slate-900 flex items-center gap-2">
+                        <TrendingUp className="w-5 h-5 text-emerald-600" />
+                        Top Selling Products
+                      </h3>
+                    </div>
+                    <div className="divide-y divide-slate-100">
+                      {stats.topSellingProducts.map((prod, i) => (
+                        <div key={i} className="p-4 flex items-center gap-4 hover:bg-slate-50 transition-colors">
+                          <div className="w-12 h-12 rounded-xl bg-slate-100 overflow-hidden">
+                            <img src={prod.imageUrl} alt="" className="w-full h-full object-cover" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="text-sm font-bold text-slate-900 line-clamp-1">{prod.productName}</div>
+                            <div className="text-xs text-slate-400">{prod.categoryName}</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm font-black text-slate-900">{prod.totalQuantitySold}</div>
+                            <div className="text-xs text-slate-400 font-bold">Sold</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Top Revenue Products */}
+                  <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                      <h3 className="font-bold text-slate-900 flex items-center gap-2">
+                        <DollarSign className="w-5 h-5 text-indigo-600" />
+                        Best Revenue Generators
+                      </h3>
+                    </div>
+                    <div className="divide-y divide-slate-100">
+                      {stats.topRevenueProducts.map((prod, i) => (
+                        <div key={i} className="p-4 flex items-center gap-4 hover:bg-slate-50 transition-colors">
+                          <div className="w-12 h-12 rounded-xl bg-slate-100 overflow-hidden">
+                            <img src={prod.imageUrl} alt="" className="w-full h-full object-cover" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="text-sm font-bold text-slate-900 line-clamp-1">{prod.productName}</div>
+                            <div className="text-xs text-slate-400">{prod.categoryName}</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm font-black text-emerald-600">${prod.totalRevenue.toLocaleString()}</div>
+                            <div className="text-xs text-slate-400 font-bold">Revenue</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recent Orders */}
+                <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+                  <div className="p-6 border-b border-slate-100">
+                    <h3 className="font-bold text-slate-900 flex items-center gap-2">
+                      <Clock className="w-5 h-5 text-indigo-600" />
+                      Recent Sales Activity
+                    </h3>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                      <thead className="bg-slate-50 border-b border-slate-100">
+                        <tr>
+                          <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Order #</th>
+                          <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Customer</th>
+                          <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Date</th>
+                          <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Amount</th>
+                          <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {stats.recentOrders.map((order) => (
+                          <tr key={order.orderId} className="hover:bg-slate-50/50 transition-colors">
+                            <td className="px-6 py-4 text-sm font-mono font-bold text-indigo-600">{order.orderNumber}</td>
+                            <td className="px-6 py-4 text-sm font-bold text-slate-900">{order.customerName}</td>
+                            <td className="px-6 py-4 text-sm text-slate-500">{order.orderDate}</td>
+                            <td className="px-6 py-4 text-sm font-black text-slate-900">${order.totalAmount.toFixed(2)}</td>
+                            <td className="px-6 py-4">
+                              <span className={`inline-flex px-2 py-1 rounded-lg text-[10px] font-black uppercase ${
+                                order.status === 'DELIVERED' ? 'bg-emerald-50 text-emerald-600' :
+                                order.status === 'CANCELLED' ? 'bg-rose-50 text-rose-600' :
+                                'bg-indigo-50 text-indigo-600'
+                              }`}>
+                                {order.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             )}
 

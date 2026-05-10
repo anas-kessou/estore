@@ -14,18 +14,20 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
+       @Query("SELECT p FROM Product p JOIN FETCH p.category LEFT JOIN FETCH p.inventory WHERE p.active = true")
        Page<Product> findByActiveTrue(Pageable pageable);
 
-       Page<Product> findByCategoryIdAndActiveTrue(Long categoryId, Pageable pageable);
+       @Query("SELECT p FROM Product p JOIN FETCH p.category LEFT JOIN FETCH p.inventory WHERE p.category.id = :categoryId AND p.active = true")
+       Page<Product> findByCategoryIdAndActiveTrue(@Param("categoryId") Long categoryId, Pageable pageable);
 
        List<Product> findByFeaturedTrueAndActiveTrue(Pageable pageable);
 
-       @Query("SELECT p FROM Product p WHERE p.active = true AND " +
+       @Query("SELECT p FROM Product p JOIN FETCH p.category LEFT JOIN FETCH p.inventory WHERE p.active = true AND " +
                      "(LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
                      "LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%')))")
        Page<Product> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
-       @Query("SELECT p FROM Product p WHERE p.active = true AND p.category.id = :categoryId AND " +
+       @Query("SELECT p FROM Product p JOIN FETCH p.category LEFT JOIN FETCH p.inventory WHERE p.active = true AND p.category.id = :categoryId AND " +
                      "(LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
                      "LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%')))")
        Page<Product> searchByKeywordAndCategory(@Param("keyword") String keyword,
@@ -39,4 +41,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
        Optional<Product> findByExternalId(String externalId);
 
        List<Product> findByExternalIdIn(Collection<String> externalIds);
+
+       long countByActiveTrue();
+
+       long countByStockQuantityLessThanAndActiveTrue(int stockLimit);
 }

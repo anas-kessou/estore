@@ -1,12 +1,4 @@
 services:
-  mongo:
-    image: mongo:7
-    container_name: estore-mongo
-    ports:
-      - "27018:27017"
-    volumes:
-      - mongo_data:/data/db
-
   mysql:
     image: mysql:8
     container_name: estore-mysql
@@ -34,16 +26,12 @@ services:
       DB_DRIVER: com.mysql.cj.jdbc.Driver
       HIBERNATE_DIALECT: org.hibernate.dialect.MySQLDialect
 
-      # Mongo for reviews
-      # (match backend default schema: backend expects Mongo URI in MONGO_URI)
-      MONGO_URI: mongodb://mongo:27017/estore_reviews
 
       # JWT
       JWT_SECRET: dev_jwt_secret_ChangeMeToSomethingLongEnough_AndRandom
       JWT_EXPIRATION: 86400000
     depends_on:
       - mysql
-      - mongo
 
   frontend:
     build:
@@ -57,5 +45,4 @@ services:
       - backend
 
 volumes:
-  mongo_data:
   mysql_data:

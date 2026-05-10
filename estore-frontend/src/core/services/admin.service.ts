@@ -59,6 +59,15 @@ export const AdminService = {
     }
   },
 
+  updateProduct: async (id: number, payload: AdminUpsertProductRequest): Promise<AdminUpsertProductResponse> => {
+    try {
+      const response = await apiClient.put(API_ENDPOINTS.ADMIN_UPDATE_PRODUCT(id), payload);
+      return unwrapResponse<AdminUpsertProductResponse>(response);
+    } catch (error) {
+      throw toApiError(error, 'Update product failed');
+    }
+  },
+
   deleteProductByExternalId: async (externalId: string): Promise<AdminDeleteProductResponse> => {
     try {
       const response = await apiClient.delete(
@@ -115,6 +124,46 @@ export const AdminService = {
       throw toApiError(error, 'Delete category failed');
     }
   },
+
+  getStatistics: async (): Promise<AdminStatistics> => {
+    try {
+      const response = await apiClient.get(API_ENDPOINTS.ADMIN_STATISTICS);
+      return unwrapResponse<AdminStatistics>(response);
+    } catch (error) {
+      throw toApiError(error, 'Fetch statistics failed');
+    }
+  },
 };
+
+export interface AdminStatistics {
+  totalProducts: number;
+  activeProducts: number;
+  totalOrders: number;
+  totalRevenue: number;
+  totalCustomers: number;
+  lowStockProducts: number;
+  ordersByStatus: Array<{ status: string; count: number }>;
+  topSellingProducts: Array<TopProduct>;
+  topRevenueProducts: Array<TopProduct>;
+  revenueByCategory: Array<{ categoryName: string; totalRevenue: number; totalOrders: number }>;
+  recentOrders: Array<{
+    orderId: number;
+    orderNumber: string;
+    customerName: string;
+    totalAmount: number;
+    status: string;
+    orderDate: string;
+  }>;
+}
+
+export interface TopProduct {
+  productId: number;
+  productName: string;
+  imageUrl: string;
+  categoryName: string;
+  totalQuantitySold: number;
+  totalRevenue: number;
+}
+
 
 
