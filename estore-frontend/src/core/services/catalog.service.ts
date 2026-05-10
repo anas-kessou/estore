@@ -96,6 +96,18 @@ export const CatalogService = {
     }
   },
 
+  getFeaturedProducts: async (limit = 8): Promise<Product[]> => {
+    try {
+      const response = await apiClient.get(API_ENDPOINTS.PRODUCT_FEATURED, {
+        params: { limit },
+      });
+      const data = unwrapResponse<BackendProductDTO[]>(response);
+      return data.map(mapProduct);
+    } catch (error) {
+      throw toApiError(error, 'Failed to fetch featured products');
+    }
+  },
+
   getProductsByCategory: async (categoryId: number, page = 0, size = 12): Promise<PageResponse<Product>> => {
     try {
       const response = await apiClient.get(API_ENDPOINTS.PRODUCTS, {

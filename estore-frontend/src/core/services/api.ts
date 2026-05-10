@@ -18,6 +18,7 @@ export const API_ENDPOINTS = {
   // Products
   PRODUCTS: '/products',
   PRODUCT_DETAIL: (id: number) => `/products/${id}`,
+  PRODUCT_FEATURED: '/products/featured',
   PRODUCT_SEARCH: '/products/search',
 
   // Inventory
