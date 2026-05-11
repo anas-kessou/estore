@@ -91,6 +91,7 @@ export interface Order {
   orderDate: string;
   totalAmount: number;
   status: string;
+  paymentMethod?: string;
   items: OrderItem[];
 }
 

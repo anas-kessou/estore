@@ -4,6 +4,7 @@ import com.estore.billing.dto.*;
 import com.estore.billing.entity.Order;
 import com.estore.billing.entity.OrderItem;
 import com.estore.billing.entity.OrderStatus;
+import com.estore.billing.entity.PaymentMethod;
 import com.estore.billing.repository.OrderItemRepository;
 import com.estore.billing.repository.OrderRepository;
 import com.estore.catalog.entity.Product;
@@ -79,6 +80,7 @@ public class BillingService {
                 .shippingPostalCode(request.getShippingPostalCode())
                 .shippingPhone(request.getShippingPhone())
                 .notes(request.getNotes())
+                .paymentMethod(request.getPaymentMethod() != null ? PaymentMethod.valueOf(request.getPaymentMethod()) : PaymentMethod.CASH_ON_DELIVERY)
                 .build();
 
         User user = new User();
@@ -196,6 +198,7 @@ public class BillingService {
                 .shippingPostalCode(order.getShippingPostalCode())
                 .shippingPhone(order.getShippingPhone())
                 .notes(order.getNotes())
+                .paymentMethod(order.getPaymentMethod().name())
                 .userId(order.getUser().getId())
                 .items(items)
                 .createdAt(order.getCreatedAt())

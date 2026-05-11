@@ -11,6 +11,7 @@ export const CheckoutPage = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [checkingOut, setCheckingOut] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'CASH_ON_DELIVERY' | 'CREDIT_CARD' | 'PAYPAL'>('CASH_ON_DELIVERY');
 
   const [formData, setFormData] = useState({
     shippingAddress: '',
@@ -75,7 +76,10 @@ export const CheckoutPage = () => {
 
     setCheckingOut(true);
     try {
-      await OrderService.createOrder(user.id, formData);
+      await OrderService.createOrder(user.id, {
+        ...formData,
+        paymentMethod: paymentMethod
+      });
       await CartService.clearCart(user.id);
       toast.success('Order placed successfully!');
       navigate('/orders');
@@ -203,20 +207,118 @@ export const CheckoutPage = () => {
                 <CreditCard className="w-5 h-5 text-emerald-600" />
                 Payment Method
               </h2>
-              <div className="p-4 border-2 border-indigo-600 bg-indigo-50/50 rounded-2xl flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white">
-                    <ShoppingBag className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-slate-900">Cash on Delivery</p>
-                    <p className="text-xs text-slate-500">Pay when you receive your items</p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Cash on Delivery */}
+                <div 
+                  onClick={() => setPaymentMethod('CASH_ON_DELIVERY')}
+                  className={`p-4 border-2 cursor-pointer rounded-2xl transition-all ${
+                    paymentMethod === 'CASH_ON_DELIVERY' 
+                    ? 'border-indigo-600 bg-indigo-50/50' 
+                    : 'border-slate-100 hover:border-slate-200 bg-white'
+                  }`}
+                >
+                  <div className="flex flex-col items-center gap-3 text-center">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+                      paymentMethod === 'CASH_ON_DELIVERY' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'
+                    }`}>
+                      <ShoppingBag className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-900">Cash</p>
+                      <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider">On Delivery</p>
+                    </div>
                   </div>
                 </div>
-                <div className="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center">
-                   <div className="w-2 h-2 rounded-full bg-white transition-all scale-100"></div>
+
+                {/* Credit Card */}
+                <div 
+                  onClick={() => setPaymentMethod('CREDIT_CARD')}
+                  className={`p-4 border-2 cursor-pointer rounded-2xl transition-all ${
+                    paymentMethod === 'CREDIT_CARD' 
+                    ? 'border-indigo-600 bg-indigo-50/50' 
+                    : 'border-slate-100 hover:border-slate-200 bg-white'
+                  }`}
+                >
+                  <div className="flex flex-col items-center gap-3 text-center">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+                      paymentMethod === 'CREDIT_CARD' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'
+                    }`}>
+                      <CreditCard className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-900">Card</p>
+                      <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider">Debit/Credit</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* PayPal */}
+                <div 
+                  onClick={() => setPaymentMethod('PAYPAL')}
+                  className={`p-4 border-2 cursor-pointer rounded-2xl transition-all ${
+                    paymentMethod === 'PAYPAL' 
+                    ? 'border-indigo-600 bg-indigo-50/50' 
+                    : 'border-slate-100 hover:border-slate-200 bg-white'
+                  }`}
+                >
+                  <div className="flex flex-col items-center gap-3 text-center">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+                      paymentMethod === 'PAYPAL' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'
+                    }`}>
+                      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20.067 8.478c.492.88.556 2.014.307 3.292-.572 2.934-2.456 4.945-5.283 4.945h-1.25c-.394 0-.719.273-.79.626l-.85 4.22c-.035.176-.188.302-.366.302h-2.1c-.25 0-.425-.234-.378-.453l2.126-10.15c.036-.176.189-.302.367-.302h4.52c.706 0 1.294.07 1.764.212.47.143.864.316 1.183.518.318.203.568.455.75.757.182.302.298.647.35 1.033zm-4.434 2.8c.45-.07.828-.246 1.114-.522.285-.276.428-.655.428-1.12 0-.306-.062-.574-.186-.793-.124-.22-.315-.39-.572-.49-.257-.101-.587-.156-.99-.156h-2.14l-.74 3.49h1.76c.55 0 1.058-.07 1.326-.41z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-900">PayPal</p>
+                      <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider">Fast & Secure</p>
+                    </div>
+                  </div>
                 </div>
               </div>
+
+              {/* Conditional Card Details Form (Mockup) */}
+              {paymentMethod === 'CREDIT_CARD' && (
+                <div className="mt-8 pt-8 border-t border-slate-100 animate-in fade-in slide-in-from-top-4 duration-500">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-bold text-slate-700 mb-2">Card Number</label>
+                      <input
+                        className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-200 outline-none font-mono"
+                        placeholder="0000 0000 0000 0000"
+                        maxLength={19}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">Expiry Date</label>
+                      <input
+                        className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-200 outline-none"
+                        placeholder="MM / YY"
+                        maxLength={5}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">CVC</label>
+                      <input
+                        className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-200 outline-none"
+                        placeholder="000"
+                        maxLength={3}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Conditional PayPal Message */}
+              {paymentMethod === 'PAYPAL' && (
+                <div className="mt-8 p-4 bg-sky-50 rounded-2xl border border-sky-100 flex items-center gap-3 text-sky-700 animate-in fade-in slide-in-from-top-4 duration-500">
+                  <div className="w-8 h-8 bg-sky-600 rounded-lg flex items-center justify-center text-white shrink-0">
+                     <Lock className="w-4 h-4" />
+                  </div>
+                  <p className="text-sm font-medium">You will be redirected to PayPal to complete your purchase securely.</p>
+                </div>
+              )}
             </section>
           </div>
 

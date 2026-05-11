@@ -31,4 +31,6 @@ public class CreateOrderRequest {
 
     @Size(max = 500, message = "Notes must be at most 500 characters")
     private String notes;
+
+    private String paymentMethod;
 }

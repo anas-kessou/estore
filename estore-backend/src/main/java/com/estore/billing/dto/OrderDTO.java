@@ -23,6 +23,7 @@ public class OrderDTO {
     private String shippingPostalCode;
     private String shippingPhone;
     private String notes;
+    private String paymentMethod;
     private Long userId;
     private String userEmail;
     private List<OrderItemDTO> items;

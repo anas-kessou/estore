@@ -122,9 +122,9 @@ export const HomePage = () => {
                 Curated Excellence 2026
               </span>
               <h1 className="text-6xl sm:text-7xl lg:text-[5.5rem] font-black font-['Plus_Jakarta_Sans'] tracking-tight mb-8 leading-[1.05] text-slate-900">
-                Design <br />
+                Elevate Your <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-br from-indigo-500 via-indigo-700 to-purple-800">
-                  Refined.
+                  Everyday.
                 </span>
               </h1>
               <p className="text-lg sm:text-xl text-slate-500 mb-10 max-w-lg leading-relaxed font-medium">

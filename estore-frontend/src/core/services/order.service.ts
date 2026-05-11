@@ -17,6 +17,7 @@ interface BackendOrderDTO {
   orderDate: string;
   totalAmount: number;
   status: string;
+  paymentMethod: string;
   userId: number;
   items: BackendOrderItemDTO[];
 }
@@ -28,6 +29,7 @@ interface CreateOrderPayload {
   shippingPostalCode?: string;
   shippingPhone?: string;
   notes?: string;
+  paymentMethod: string;
 }
 
 const mapOrder = (order: BackendOrderDTO): Order => ({
@@ -37,6 +39,7 @@ const mapOrder = (order: BackendOrderDTO): Order => ({
   orderDate: order.orderDate,
   totalAmount: Number(order.totalAmount),
   status: order.status,
+  paymentMethod: order.paymentMethod,
   items: (order.items || []).map((item) => ({
     id: item.id,
     quantity: item.quantity,
@@ -60,6 +63,7 @@ const defaultOrderPayload = (overrides?: Partial<CreateOrderPayload>): CreateOrd
   shippingPostalCode: overrides?.shippingPostalCode,
   shippingPhone: overrides?.shippingPhone,
   notes: overrides?.notes,
+  paymentMethod: overrides?.paymentMethod || 'CASH_ON_DELIVERY',
 });
 
 export const OrderService = {
